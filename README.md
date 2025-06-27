@@ -71,7 +71,7 @@ server-monitor/
 ### 1. 环境要求
 
 - Go 1.21 或更高版本
-- Windows/Linux/macOS
+- Windows/Linux/macOS  Windows没有测试 建议只在Linux编译 确保go环境齐全 并且有GCC 
 
 ### 2. 安装依赖
 
