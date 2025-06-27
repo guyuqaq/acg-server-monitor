@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>二次元监控面板</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>tailwind.config={theme:{extend:{colors:{primary:'#ff6b9d',secondary:'#8a6fff'},borderRadius:{'none':'0px','sm':'4px',DEFAULT:'8px','md':'12px','lg':'16px','xl':'20px','2xl':'24px','3xl':'32px','full':'9999px','button':'8px'}}}}</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/remixicon.min.css">
+
+    <!--
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+        script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
+-->
+     <script src="js/echarts.min.js"></script>
+    <style>
+        :where([class^="ri-"])::before { content: "\f3c2"; }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .liquid-glass {
+            backdrop-filter: blur(12px);
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .liquid-glass-dark {
+            backdrop-filter: blur(12px);
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        
+        .cherry-blossom {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #ffb7c5;
+            border-radius: 15px;
+            filter: blur(3px);
+            opacity: 0.7;
+            animation: fall linear forwards;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        .ripple {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.4);
+            transform: scale(0);
+            animation: ripple-effect 1s linear;
+            pointer-events: none;
+        }
+        
+        @keyframes ripple-effect {
+            to {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+        
+        .glow {
+            animation: glow-effect 3s infinite alternate;
+        }
+        
+        @keyframes glow-effect {
+            0% {
+                box-shadow: 0 0 5px rgba(255, 107, 157, 0.5);
+            }
+            100% {
+                box-shadow: 0 0 20px rgba(255, 107, 157, 0.8);
+            }
+        }
+        
+        .float {
+            animation: float-effect 3s ease-in-out infinite;
+        }
+        
+        @keyframes float-effect {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .btn-hover:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+        
+        .silhouette {
+            position: absolute;
+            opacity: 0.6;
+            filter: brightness(0) invert(1);
+            animation: silhouette-float 15s ease-in-out infinite;
+        }
+        
+        @keyframes silhouette-float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+            }
+            25% {
+                transform: translateY(-15px) translateX(10px);
+            }
+            50% {
+                transform: translateY(0) translateX(20px);
+            }
+            75% {
+                transform: translateY(15px) translateX(10px);
+            }
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            background-image: linear-gradient(to right, #ff6b9d, #8a6fff);
+            background-size: 70% 100%;
+            background-repeat: no-repeat;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 18px;
+            width: 18px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        
+        .custom-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .custom-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .switch-slider {
+            background-color: rgba(255, 107, 157, 0.7);
+        }
+        
+        input:checked + .switch-slider:before {
+            transform: translateX(24px);
+        }
+        
+        .card-3d {
+            opacity: 0;
+            transform: scale(0.7) perspective(800px) rotateY(18deg) rotateX(8deg);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 1.5px 8px rgba(255,107,157,0.12);
+            transition: 
+                opacity 0.7s cubic-bezier(.68,-0.55,.27,1.55),
+                transform 0.7s cubic-bezier(.68,-0.55,.27,1.55),
+                box-shadow 0.7s cubic-bezier(.68,-0.55,.27,1.55);
+            will-change: opacity, transform;
+        }
+        .card-3d.in {
+            opacity: 1;
+            transform: scale(1) perspective(800px) rotateY(0deg) rotateX(0deg);
+            box-shadow: 0 16px 48px rgba(255,107,157,0.18), 0 2px 12px rgba(138,111,255,0.10);
+        }
+        .card-3d:hover {
+            transform: scale(1.03) perspective(800px) rotateY(6deg) rotateX(2deg);
+            box-shadow: 0 24px 64px rgba(255,107,157,0.22), 0 4px 16px rgba(138,111,255,0.16);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen">
+    <div id="background" class="fixed inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out" style="z-index: -10;"></div>
+    
+    <div id="overlay" class="fixed inset-0 bg-gradient-to-b from-black/10 to-black/30" style="z-index: -5;"></div>
+    
+    <div id="silhouettes" class="fixed inset-0 overflow-hidden" style="z-index: -3;"></div>
+    
+    <div id="cherry-blossoms" class="fixed inset-0 overflow-hidden" style="z-index: -2;"></div>
+    
+    <div class="container mx-auto px-4 h-screen flex flex-col">
+        <!-- 顶部导航 -->
+        <header class="py-4 z-10">
+            <div class="liquid-glass rounded-xl p-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div class="flex items-center">
+                    <span class="text-white font-['Pacifico'] text-2xl mr-2">logo</span>
+                    <span class="text-white text-lg">二次元服务器监控</span>
+                </div>
+                <div class="flex items-center space-x-4 mt-2 sm:mt-0">
+                    <div class="liquid-glass-dark rounded-full px-4 py-2 flex items-center">
+                        <span class="text-white text-sm">2025-06-26</span>
+                        <div class="w-1 h-6 bg-white/20 mx-3 rounded-full"></div>
+                        <span class="text-white text-sm" id="current-time">00:00:00</span>
+                    </div>
+                    <button class="btn-hover liquid-glass-dark rounded-full w-10 h-10 flex items-center justify-center">
+                        <i class="ri-refresh-line text-white ri-lg"></i>
+                    </button>
+                    <button class="btn-hover liquid-glass-dark rounded-full w-10 h-10 flex items-center justify-center">
+                        <i class="ri-settings-3-line text-white ri-lg"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- 主要内容 -->
+        <main class="flex-1 grid grid-cols-1 sm:grid-cols-12 gap-4 py-4">
+            <!-- 左侧面板 -->
+            <div class="sm:col-span-3 flex flex-col space-y-4">
+                <!-- 系统状态卡片 -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-1/2 h-auto min-h-[180px] card-3d" id="system-status-card">
+                    <h3 class="text-white text-lg mb-4 flex items-center">
+                        <i class="ri-dashboard-3-line text-primary mr-2 ri-lg"></i>
+                        系统状态
+                    </h3>
+                    <div class="flex-1 flex flex-col justify-between">
+                        <div class="space-y-6">
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-white text-sm">CPU 使用率</span>
+                                    <span class="text-primary text-sm font-bold" id="cpu-percentage">--%</span>
+                                </div>
+                                <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" id="cpu-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-white text-sm">内存使用率</span>
+                                    <span class="text-primary text-sm font-bold" id="memory-percentage">--%</span>
+                                </div>
+                                <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" id="memory-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <span class="text-white text-sm">磁盘使用率</span>
+                                    <span class="text-primary text-sm font-bold" id="disk-percentage">--%</span>
+                                </div>
+                                <div class="h-2 bg-white/20 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" id="disk-bar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="liquid-glass-dark rounded-lg p-3 text-center">
+                                <div class="text-xs text-white/70">上传速度</div>
+                                <div class="text-white font-bold" id="upload-speed">-- MB/s</div>
+                            </div>
+                            <div class="liquid-glass-dark rounded-lg p-3 text-center">
+                                <div class="text-xs text-white/70">下载速度</div>
+                                <div class="text-white font-bold" id="download-speed">-- MB/s</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- 服务状态卡片（动态渲染） -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-1/2 h-auto min-h-[180px] card-3d" id="service-status-card">
+                    <h3 class="text-white text-lg mb-4 flex items-center">
+                        <i class="ri-server-line text-primary mr-2 ri-lg"></i>
+                        服务状态
+                    </h3>
+                    <div class="flex-1 space-y-3" id="service-status-list"></div>
+                </div>
+            </div>
+            
+            <!-- 中间面板 -->
+            <div class="sm:col-span-6 flex flex-col space-y-4">
+                <!-- 主要图表 -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-3/5 h-auto min-h-[200px] card-3d" id="main-chart-card">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                        <h3 class="text-white text-lg flex items-center">
+                            <i class="ri-line-chart-line text-primary mr-2 ri-lg"></i>
+                            系统资源监控
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button id="btn-realtime" class="btn-hover liquid-glass-dark rounded-full px-3 py-1 text-white text-xs !rounded-button whitespace-nowrap">实时</button>
+                            <button id="btn-24h" class="btn-hover liquid-glass-dark rounded-full px-3 py-1 text-white text-xs !rounded-button whitespace-nowrap">24 小时</button>
+                            <button id="btn-7d" class="btn-hover liquid-glass-dark rounded-full px-3 py-1 text-white text-xs !rounded-button whitespace-nowrap">7 天</button>
+                            <button id="download-main-chart" class="btn-hover liquid-glass-dark rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="ri-download-2-line text-white ri-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-h-[180px]" id="main-chart"></div>
+                </div>
+                
+                <!-- 网络流量图表 -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-2/5 h-auto min-h-[180px] card-3d" id="network-chart-card">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                        <h3 class="text-white text-lg flex items-center">
+                            <i class="ri-wifi-line text-primary mr-2 ri-lg"></i>
+                            网络流量监控
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button id="download-network-chart" class="btn-hover liquid-glass-dark rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="ri-download-2-line text-white ri-sm"></i>
+                            </button>
+                            <button class="btn-hover liquid-glass-dark rounded-full w-8 h-8 flex items-center justify-center">
+                                <i class="ri-refresh-line text-white ri-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-h-[180px]" id="network-chart"></div>
+                </div>
+            </div>
+            
+            <!-- 右侧面板 -->
+            <div class="sm:col-span-3 flex flex-col space-y-4">
+                <!-- 磁盘使用情况 -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-2/5 h-auto min-h-[180px] card-3d" id="disk-chart-card">
+                    <h3 class="text-white text-lg mb-4 flex items-center">
+                        <i class="ri-hard-drive-2-line text-primary mr-2 ri-lg"></i>
+                        磁盘使用情况
+                    </h3>
+                    <div class="flex-1 min-h-[120px]" id="disk-chart"></div>
+                </div>
+                
+                <!-- 系统日志 -->
+                <div class="liquid-glass rounded-xl p-4 flex flex-col sm:h-3/5 h-auto min-h-[180px] card-3d" id="system-log-card">
+                    <h3 class="text-white text-lg mb-4 flex items-center">
+                        <i class="ri-file-list-3-line text-primary mr-2 ri-lg"></i>
+                        系统日志
+                    </h3>
+                    <div class="flex-1 overflow-y-auto pr-2 space-y-3" id="system-log-list"></div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- 底部控制面板 -->
+        <footer class="py-4 z-10">
+            <div class="liquid-glass rounded-xl p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-6">
+                        <div class="flex items-center">
+                            <span class="text-white text-sm mr-3">樱花特效</span>
+                            <label class="custom-switch">
+                                <input type="checkbox" id="cherry-toggle" checked>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <span class="text-white text-sm mr-3">自动切换背景</span>
+                            <label class="custom-switch">
+                                <input type="checkbox" id="auto-bg-toggle" checked>
+                                <span class="switch-slider"></span>
+                            </label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <span class="text-white text-sm mr-3">模糊度</span>
+                            <input type="range" min="0" max="20" value="12" class="w-24" id="blur-slider">
+                        </div>
+                    </div>
+                    
+                <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-2 sm:mt-0">
+                        <button class="btn-hover liquid-glass-dark rounded-full w-10 h-10 flex items-center justify-center glow" id="refresh-bg">
+                            <i class="ri-refresh-line text-white ri-lg"></i>
+                        </button>
+                        <button class="btn-hover liquid-glass-dark rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="ri-download-2-line text-white ri-lg"></i>
+                        </button>
+                        <button class="btn-hover liquid-glass-dark rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="ri-fullscreen-line text-white ri-lg"></i>
+                        </button>
+                    <button class="btn-hover bg-gradient-to-r from-primary to-secondary rounded-full px-4 h-10 flex items-center justify-center !rounded-button whitespace-nowrap" id="download-bg-btn">
+                            <i class="ri-heart-3-line text-white ri-lg mr-1"></i>
+                            <span class="text-white">收藏壁纸</span>
+                        </button>
+                </div>
+            </div>
+        </footer>
+    </div>
+    
+    <!-- 下载格式选择弹窗 -->
+    <div id="download-modal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+        <div class="liquid-glass rounded-xl p-6 max-w-sm w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-white text-lg font-bold">选择下载格式</h3>
+                <button id="close-download-modal" class="text-white/70 hover:text-white">
+                    <i class="ri-close-line ri-lg"></i>
+                </button>
+            </div>
+            <div class="space-y-3">
+                <button id="download-png" class="w-full liquid-glass-dark rounded-lg p-4 flex items-center justify-between hover:bg-white/10 transition-colors">
+                    <div class="flex items-center">
+                        <i class="ri-image-line text-primary ri-lg mr-3"></i>
+                        <div class="text-left">
+                            <div class="text-white font-medium">PNG 图片</div>
+                            <div class="text-white/60 text-sm">高清图表截图</div>
+                        </div>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-white/60"></i>
+                </button>
+                <button id="download-json" class="w-full liquid-glass-dark rounded-lg p-4 flex items-center justify-between hover:bg-white/10 transition-colors">
+                    <div class="flex items-center">
+                        <i class="ri-file-code-line text-primary ri-lg mr-3"></i>
+                        <div class="text-left">
+                            <div class="text-white font-medium">JSON 数据</div>
+                            <div class="text-white/60 text-sm">原始监控数据</div>
+                        </div>
+                    </div>
+                    <i class="ri-arrow-right-s-line text-white/60"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 动态渲染 -->
+    <div style="display:none">
+        <div id="system-log-list"></div>
+    </div>
+    
+    <!-- 卡片容器 -->
+    <div id="hardware-tooltip" style="display:none;position:fixed;z-index:9999;min-width:220px;max-width:320px;padding:16px;background:linear-gradient(135deg,#ff6b9d 60%,#8a6fff 100%);color:#fff;border-radius:16px;box-shadow:0 8px 32px rgba(0,0,0,0.18);font-size:14px;pointer-events:none;transition:opacity 0.2s;opacity:0;backdrop-filter:blur(6px);"></div>
+    
+    <script id="background-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            const background = document.getElementById('background');
+            const refreshBgBtn = document.getElementById('refresh-bg');
+            const autoBgToggle = document.getElementById('auto-bg-toggle');
+            let bgInterval;
+            
+            // 背景api
+            function loadRandomBackground() {
+                const timestamp = new Date().getTime();
+                const bgUrl = `https://www.loliapi.com/acg/?t=${timestamp}`;
+                
+                const tempImg = new Image();
+                tempImg.onload = function() {
+                    background.style.backgroundImage = `url(${bgUrl})`;
+                    background.classList.add('opacity-100');
+                    background.classList.remove('opacity-0');
+                };
+                tempImg.src = bgUrl;
+                
+                background.classList.add('opacity-0');
+                background.classList.remove('opacity-100');
+            }
+            
+            // 加载背景
+            loadRandomBackground();
+            
+            // auto 背景
+            function setAutoBackground() {
+                if (autoBgToggle.checked) {
+                    bgInterval = setInterval(loadRandomBackground, 30000); // 30s切换一次 
+                } else {
+                    clearInterval(bgInterval);
+                }
+            }
+            
+            // 自动切换
+            setAutoBackground();
+            
+            // 切换背景
+            autoBgToggle.addEventListener('change', setAutoBackground);
+            
+            // 手动刷新背景
+            refreshBgBtn.addEventListener('click', function() {
+                loadRandomBackground();
+                
+                // 按钮点击特效
+                const ripple = document.createElement('span');
+                ripple.classList.add('ripple');
+                this.appendChild(ripple);
+                
+                const rect = this.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                ripple.style.width = ripple.style.height = `${size}px`;
+                ripple.style.left = `${event.clientX - rect.left - size/2}px`;
+                ripple.style.top = `${event.clientY - rect.top - size/2}px`;
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 1000);
+            });
+            
+            // 模糊度调整
+            const blurSlider = document.getElementById('blur-slider');
+            const liquidGlassElements = document.querySelectorAll('.liquid-glass, .liquid-glass-dark');
+            
+            blurSlider.addEventListener('input', function() {
+                const blurValue = this.value;
+                liquidGlassElements.forEach(element => {
+                    element.style.backdropFilter = `blur(${blurValue}px)`;
+                });
+            });
+        });
+    </script>
+    
+    <script id="cherry-blossom-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            const cherryBlossoms = document.getElementById('cherry-blossoms');
+            const cherryToggle = document.getElementById('cherry-toggle');
+            let cherryInterval;
+            
+            function createCherryBlossom() {
+                const cherry = document.createElement('div');
+                cherry.classList.add('cherry-blossom');
+                
+                // 大小
+                const size = Math.random() * 10 + 5;
+                cherry.style.width = `${size}px`;
+                cherry.style.height = `${size}px`;
+                
+                // 随机颜色
+                const colors = ['#ffb7c5', '#ffc0cb', '#ffd1dc', '#fff0f5'];
+                cherry.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // 随机位置
+                cherry.style.left = `${Math.random() * 100}vw`;
+                cherry.style.top = '-20px';
+                
+                // 随机动画时间
+                const duration = Math.random() * 5 + 5;
+                cherry.style.animationDuration = `${duration}s`;
+                
+                cherryBlossoms.appendChild(cherry);
+                
+                // 动画结束后移除
+                setTimeout(() => {
+                    cherry.remove();
+                }, duration * 1000);
+            }
+            
+            function startCherryBlossoms() {
+                if (cherryToggle.checked) {
+                    cherryInterval = setInterval(createCherryBlossom, 300);
+                } else {
+                    clearInterval(cherryInterval);
+                }
+            }
+            
+            // 初始设置樱花 也不算樱花？
+            startCherryBlossoms();
+            
+            // 切换樱花
+            cherryToggle.addEventListener('change', startCherryBlossoms);
+        });
+    </script>
+    
+    <script id="silhouette-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            const silhouettesContainer = document.getElementById('silhouettes');
+            const silhouetteCount = 3;
+            
+            
+            // 剪影
+            for (let i = 0; i < silhouetteCount; i++) {
+                const silhouette = document.createElement('img');
+                silhouette.classList.add('silhouette');
+                silhouette.src = silhouetteData[i];
+                
+                // 随机位置
+                silhouette.style.top = `${Math.random() * 60 + 20}%`;
+                silhouette.style.left = `${Math.random() * 80 + 10}%`;
+                
+                // 随机大小
+                const scale = Math.random() * 0.3 + 0.2;
+                silhouette.style.transform = `scale(${scale})`;
+                
+                // 随机动画延迟
+                silhouette.style.animationDelay = `${Math.random() * 5}s`;
+                
+                silhouettesContainer.appendChild(silhouette);
+            }
+        });
+    </script>
+    
+    <script id="charts-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            // 主图表
+            const mainChart = echarts.init(document.getElementById('main-chart'));
+            window.mainChart = mainChart;
+            const mainOption = {
+                animation: false,
+                color: ['rgba(87, 181, 231, 1)', 'rgba(141, 211, 199, 1)', 'rgba(251, 191, 114, 1)'],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    textStyle: { color: '#1f2937' }
+                },
+                legend: {
+                    data: ['CPU', '内存', '磁盘'],
+                    textStyle: { color: '#fff' },
+                    right: 0
+                },
+                grid: {
+                    left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true
+                },
+                xAxis: {
+                    type: 'category', boundaryGap: false, data: [],
+                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+                    axisLabel: { color: 'rgba(255, 255, 255, 0.7)' }
+                },
+                yAxis: {
+                    type: 'value', max: 100,
+                    axisLine: { show: false },
+                    axisLabel: { color: 'rgba(255, 255, 255, 0.7)' },
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+                },
+                series: [
+                    { name: 'CPU', type: 'line', smooth: true, lineStyle: { width: 3 }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [ { offset: 0, color: 'rgba(87, 181, 231, 0.3)' }, { offset: 1, color: 'rgba(87, 181, 231, 0.1)' } ]) }, data: [] },
+                    { name: '内存', type: 'line', smooth: true, lineStyle: { width: 3 }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [ { offset: 0, color: 'rgba(141, 211, 199, 0.3)' }, { offset: 1, color: 'rgba(141, 211, 199, 0.1)' } ]) }, data: [] },
+                    { name: '磁盘', type: 'line', smooth: true, lineStyle: { width: 3 }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [ { offset: 0, color: 'rgba(251, 191, 114, 0.3)' }, { offset: 1, color: 'rgba(251, 191, 114, 0.1)' } ]) }, data: [] }
+                ]
+            };
+            mainChart.setOption(mainOption);
+            
+            // 流量图表
+            const networkChart = echarts.init(document.getElementById('network-chart'));
+            window.networkChart = networkChart;
+            const networkOption = {
+                animation: false,
+                color: ['rgba(87, 181, 231, 1)', 'rgba(252, 141, 98, 1)'],
+                tooltip: {
+                    trigger: 'axis',
+                    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+                    textStyle: { color: '#1f2937' }
+                },
+                legend: {
+                    data: ['上传', '下载'],
+                    textStyle: { color: '#fff' },
+                    right: 0
+                },
+                grid: {
+                    left: '3%', right: '4%', bottom: '3%', top: '15%', containLabel: true
+                },
+                xAxis: {
+                    type: 'category', boundaryGap: false, data: [],
+                    axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+                    axisLabel: { color: 'rgba(255, 255, 255, 0.7)' }
+                },
+                yAxis: {
+                    type: 'value', axisLine: { show: false },
+                    axisLabel: { color: 'rgba(255, 255, 255, 0.7)', formatter: '{value} MB/s' },
+                    splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
+                },
+                series: [
+                    { name: '上传', type: 'line', smooth: true, lineStyle: { width: 3 }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [ { offset: 0, color: 'rgba(87, 181, 231, 0.3)' }, { offset: 1, color: 'rgba(87, 181, 231, 0.1)' } ]) }, data: [] },
+                    { name: '下载', type: 'line', smooth: true, lineStyle: { width: 3 }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [ { offset: 0, color: 'rgba(252, 141, 98, 0.3)' }, { offset: 1, color: 'rgba(252, 141, 98, 0.1)' } ]) }, data: [] }
+                ]
+            };
+            networkChart.setOption(networkOption);
+            
+            // --- 磁盘占用圆形 ---
+            const diskChart = echarts.init(document.getElementById('disk-chart'));
+            const diskOption = {
+                series: [
+                    {
+                        name: '磁盘使用率',
+                        type: 'pie',
+                        radius: ['70%', '90%'],
+                        avoidLabelOverlap: false,
+                            label: {
+                                show: true,
+                            position: 'center',
+                            formatter: function(params) {
+                                return params.value + '%';
+                            },
+                            fontSize: 24,
+                            color: '#fff',
+                            fontWeight: 'bold'
+                        },
+                        labelLine: { show: false },
+                        data: [
+                            { value: 0, name: '已用', itemStyle: { color: '#ff6b9d' } },
+                            { value: 100, name: '可用', itemStyle: { color: 'rgba(255,255,255,0.15)' } }
+                        ]
+                    }
+                ]
+            };
+            diskChart.setOption(diskOption);
+            
+            // 更新函数
+            window.updateDiskChart = function(usage) {
+                usage = Math.round(usage * 100) / 100;
+                diskChart.setOption({
+                    series: [{
+                        data: [
+                            { value: usage, name: '已用', itemStyle: { color: '#ff6b9d' } },
+                            { value: 100 - usage, name: '可用', itemStyle: { color: 'rgba(255,255,255,0.15)' } }
+                        ],
+                        label: {
+                            formatter: usage + '%'
+                        }
+                    }]
+                });
+            };
+
+            // 主图表切换逻辑
+            let mainChartMode = 'realtime';
+            window.mainChartMode = mainChartMode; // 设为全局变量
+            function fetchAndRenderMainChart(mode) {
+                let url = '/api/v1/metrics?limit=100';
+                if (mode === '24h') url = '/api/v1/metrics?hours=24';
+                if (mode === '7d') url = '/api/v1/metrics?days=7';
+                fetch(url)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.code === 200 && res.data) {
+                            const metrics = res.data.reverse();
+                            const times = metrics.map(m => m.timestamp ? m.timestamp.substring(11, 16) : '');
+                            const cpu = metrics.map(m => m.cpu);
+                            const memory = metrics.map(m => m.memory);
+                            const disk = metrics.map(m => m.disk);
+                mainChart.setOption({
+                                xAxis: { data: times },
+                    series: [
+                                    { data: cpu },
+                                    { data: memory },
+                                    { data: disk }
+                    ]
+                });
+                        }
+                    });
+            }
+            // 按钮事件
+            const btnRealtime = document.getElementById('btn-realtime');
+            const btn24h = document.getElementById('btn-24h');
+            const btn7d = document.getElementById('btn-7d');
+            function setMainChartActive(btn) {
+                [btnRealtime, btn24h, btn7d].forEach(b => b.classList.remove('ring-2','ring-primary'));
+                btn.classList.add('ring-2','ring-primary');
+            }
+            if (btnRealtime) {
+                btnRealtime.addEventListener('click', function() {
+                    mainChartMode = 'realtime';
+                    window.mainChartMode = mainChartMode; // 更新全局变量
+                    setMainChartActive(btnRealtime);
+                    fetchAndRenderMainChart('realtime');
+                });
+            }
+            if (btn24h) {
+                btn24h.addEventListener('click', function() {
+                    mainChartMode = '24h';
+                    window.mainChartMode = mainChartMode; // 更新全局变量
+                    setMainChartActive(btn24h);
+                    fetchAndRenderMainChart('24h');
+                });
+            }
+            if (btn7d) {
+                btn7d.addEventListener('click', function() {
+                    mainChartMode = '7d';
+                    window.mainChartMode = mainChartMode; // 更新全局变量
+                    setMainChartActive(btn7d);
+                    fetchAndRenderMainChart('7d');
+                });
+            }
+            // 初始加载
+            setMainChartActive(btnRealtime);
+            fetchAndRenderMainChart('realtime');
+            setInterval(()=>fetchAndRenderMainChart(mainChartMode), 10000);
+
+            // =全局数组存储实时数据
+            window.netTimes = [];
+            window.netUpload = [];
+            window.netDownload = [];
+            window.maxNetPoints = 50;
+
+            // 全局函数供websocket调用
+            window.updateNetworkChartRealtime = function(time, upload, download) {
+                netTimes.push(time);
+                netUpload.push(upload);
+                netDownload.push(download);
+                if (netTimes.length > maxNetPoints) {
+                    netTimes.shift();
+                    netUpload.shift();
+                    netDownload.shift();
+                }
+                networkChart.setOption({
+                    xAxis: { data: netTimes },
+                    series: [
+                        { data: netUpload },
+                        { data: netDownload }
+                    ]
+                });
+            };
+
+            // 窗口大小变化时重新渲染图表
+            window.addEventListener('resize', function() {
+                mainChart.resize();
+                networkChart.resize();
+                diskChart.resize();
+            });
+        });
+    </script>
+    
+    <script id="time-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateTime() {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                
+                document.getElementById('current-time').textContent = `${hours}:${minutes}:${seconds}`;
+            }
+            
+            // 初始更新时间
+            updateTime();
+            
+            // 每秒更新时间
+            setInterval(updateTime, 1000);
+        });
+    </script>
+    
+    <script id="interaction-script">
+        document.addEventListener('DOMContentLoaded', function() {
+            // 波纹效果
+            const buttons = document.querySelectorAll('button');
+            
+            buttons.forEach(button => {
+                button.addEventListener('click', function(e) {
+                    const rect = this.getBoundingClientRect();
+                    const size = Math.max(rect.width, rect.height);
+                    
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+                    
+                    ripple.style.width = ripple.style.height = `${size}px`;
+                    ripple.style.left = `${e.clientX - rect.left - size/2}px`;
+                    ripple.style.top = `${e.clientY - rect.top - size/2}px`;
+                    
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 1000);
+                });
+            });
+            
+            // 全屏
+            const fullscreenBtn = document.querySelector('.ri-fullscreen-line').parentElement;
+            
+            fullscreenBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    this.querySelector('i').classList.remove('ri-fullscreen-line');
+                    this.querySelector('i').classList.add('ri-fullscreen-exit-line');
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        this.querySelector('i').classList.remove('ri-fullscreen-exit-line');
+                        this.querySelector('i').classList.add('ri-fullscreen-line');
+                    }
+                }
+            });
+        });
+    </script>
+    
+    <script>
+        // WebSocket
+        (function() {
+            let wsProtocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+            let wsUrl = wsProtocol + location.host + '/ws';
+            let ws = new WebSocket(wsUrl);
+
+            ws.onopen = function() {
+                ws.send(JSON.stringify({type: 'subscribe', data_type: 'metrics'}));
+                console.log('WebSocket 连接已建立');
+            };
+
+            ws.onmessage = function(event) {
+                let msg = JSON.parse(event.data);
+                if (msg.type === 'system_metrics') {
+                    let data = msg.data;
+                    document.getElementById('cpu-percentage').textContent = data.cpu + '%';
+                    document.getElementById('memory-percentage').textContent = data.memory + '%';
+                    document.getElementById('disk-percentage').textContent = data.disk + '%';
+                    document.getElementById('cpu-bar').style.width = data.cpu + '%';
+                    document.getElementById('memory-bar').style.width = data.memory + '%';
+                    document.getElementById('disk-bar').style.width = data.disk + '%';
+                    document.getElementById('upload-speed').textContent = data.upload + ' MB/s';
+                    document.getElementById('download-speed').textContent = data.download + ' MB/s';
+                    // 新增：实时追加到网络图表 并不在数据库拉取数据 （脑残了 直接改到获取实时数据 不用数据库省一大半事 写都写了就这样写完吧（
+                    let now = new Date();
+                    let timeStr = now.getHours().toString().padStart(2, '0') + ':' +
+                                  now.getMinutes().toString().padStart(2, '0') + ':' +
+                                  now.getSeconds().toString().padStart(2, '0');
+                    if (window.updateNetworkChartRealtime) {
+                        window.updateNetworkChartRealtime(timeStr, data.upload, data.download);
+                    }
+                    // 磁盘环形图
+                    if (window.updateDiskChart) {
+                        window.updateDiskChart(data.disk);
+                    }
+                }
+                if (msg.type === 'service_status') {
+                    updateServiceStatus(msg.data);
+                }
+                if (msg.type === 'system_log') {
+                    console.log('收到日志推送', msg.data);
+                    updateSystemLogs(msg.data);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket 连接已关闭');
+                setTimeout(() => location.reload(), 3000);
+            };
+
+            ws.onerror = function(e) {
+                console.error('WebSocket 错误', e);
+            };
+        })();
+
+        // 渲染服务状态
+        function updateServiceStatus(services) {
+            // 渲染到服务状态卡片
+            const container = document.getElementById('service-status-list');
+            if (!container) return;
+            container.innerHTML = '';
+            services.forEach(s => {
+                let statusColor = s.status === 'running' ? 'bg-green-400' : (s.status === 'warning' ? 'bg-yellow-400' : 'bg-red-400');
+                let statusText = s.status === 'running' ? '运行中' : (s.status === 'warning' ? '警告' : '异常');
+                let icon = s.name.includes('数据库') ? 'ri-database-2-line' :
+                           s.name.includes('云存储') ? 'ri-cloud-line' :
+                           s.name.includes('邮件') ? 'ri-mail-line' :
+                           s.name.includes('Web') ? 'ri-global-line' : 'ri-server-line';
+                container.innerHTML += `
+                    <div class="flex items-center justify-between p-2 liquid-glass-dark rounded-lg">
+                        <div class="flex items-center">
+                            <div class="w-8 h-8 flex items-center justify-center">
+                                <i class="${icon} text-white ri-lg"></i>
+                            </div>
+                            <span class="text-white text-sm ml-2">${s.name}</span>
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-block w-2 h-2 ${statusColor} rounded-full mr-2"></span>
+                            <span class="text-white text-xs">${statusText}</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // 渲染系统日志
+        function updateSystemLogs(logs) {
+            console.log('updateSystemLogs调用，参数：', logs);
+            const container = document.getElementById('system-log-list');
+            if (!container) {
+                console.error('找不到system-log-list容器');
+                return;
+            }
+            container.innerHTML = '';
+            if (!Array.isArray(logs)) {
+                console.warn('logs不是数组', logs);
+                return;
+            }
+            logs.slice(0, 5).forEach(log => {
+                console.log('处理日志项:', log);
+                let time = '';
+                if (log.timestamp) {
+                    if (typeof log.timestamp === 'string') {
+                        time = log.timestamp.length > 10 ? log.timestamp.substring(11, 19) : log.timestamp;
+                    } else if (log.timestamp instanceof Date) {
+                        time = log.timestamp.toTimeString().substring(0, 8);
+                    }
+                }
+                
+                // 使用正确的字段名（注意大小写）
+                const category = log.Category || log.category || '';
+                const message = log.Message || log.message || '';
+                const level = log.Level || log.level || 'info';
+                
+                container.innerHTML += `
+                    <div class="liquid-glass-dark rounded-lg p-3">
+                        <div class="flex justify-between items-center mb-1">
+                            <span class="text-white text-xs">${category}</span>
+                            <span class="text-white/70 text-xs">${time}</span>
+                        </div>
+                        <p class="text-white text-sm">${message}</p>
+                    </div>
+                `;
+            });
+        }
+
+        // 网络图表可以下载为PNG 没什么用 好看就是了
+
+        const downloadNetworkChartBtn = document.getElementById('download-network-chart');
+        if (downloadNetworkChartBtn) {
+            downloadNetworkChartBtn.addEventListener('click', function() {
+                if (window.networkChart) {
+                    const url = window.networkChart.getDataURL({
+                        type: 'png',
+                        pixelRatio: 2,
+                        backgroundColor: '#22223b'
+                    });
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'network-chart.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+            });
+        }
+
+        // 系统资源监控图表下载功能
+        const downloadMainChartBtn = document.getElementById('download-main-chart');
+        const downloadModal = document.getElementById('download-modal');
+        const closeDownloadModal = document.getElementById('close-download-modal');
+        const downloadPngBtn = document.getElementById('download-png');
+        const downloadJsonBtn = document.getElementById('download-json');
+
+        // 显示下载弹窗
+        if (downloadMainChartBtn) {
+            downloadMainChartBtn.addEventListener('click', function() {
+                downloadModal.classList.remove('hidden');
+                downloadModal.classList.add('flex');
+            });
+        }
+
+        // 关闭下载弹窗
+        if (closeDownloadModal) {
+            closeDownloadModal.addEventListener('click', function() {
+                downloadModal.classList.add('hidden');
+                downloadModal.classList.remove('flex');
+            });
+        }
+
+        // 点击弹窗背景关闭
+        if (downloadModal) {
+            downloadModal.addEventListener('click', function(e) {
+                if (e.target === downloadModal) {
+                    downloadModal.classList.add('hidden');
+                    downloadModal.classList.remove('flex');
+                }
+            });
+        }
+
+        // 下载PNG格式
+        if (downloadPngBtn) {
+            downloadPngBtn.addEventListener('click', function() {
+                if (window.mainChart) {
+                    const url = window.mainChart.getDataURL({
+                        type: 'png',
+                        pixelRatio: 2,
+                        backgroundColor: '#22223b'
+                    });
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'system-resources-chart.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                }
+                downloadModal.classList.add('hidden');
+                downloadModal.classList.remove('flex');
+            });
+        }
+
+        // 下载JSON格式
+        if (downloadJsonBtn) {
+            downloadJsonBtn.addEventListener('click', function() {
+                // 获取当前图表模式的数据
+                let dataUrl = '/api/v1/metrics?limit=100';
+                if (window.mainChartMode === '24h') {
+                    dataUrl = '/api/v1/metrics?hours=24';
+                } else if (window.mainChartMode === '7d') {
+                    dataUrl = '/api/v1/metrics?days=7';
+                }
+
+                fetch(dataUrl)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.code === 200 && res.data) {
+                            const jsonData = {
+                                chart_type: 'system_resources',
+                                time_range: window.mainChartMode,
+                                timestamp: new Date().toISOString(),
+                                data: res.data
+                            };
+                            
+                            const blob = new Blob([JSON.stringify(jsonData, null, 2)], {
+                                type: 'application/json'
+                            });
+                            const url = URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.href = url;
+                            a.download = `system-resources-${window.mainChartMode}-${new Date().toISOString().split('T')[0]}.json`;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            URL.revokeObjectURL(url);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('下载JSON数据失败:', err);
+                        alert('下载失败，请重试');
+                    });
+                
+                downloadModal.classList.add('hidden');
+                downloadModal.classList.remove('flex');
+            });
+        }
+
+        // 收藏壁纸下载当前背景图 （随机api请求而已）
+
+        const downloadBgBtn = document.getElementById('download-bg-btn');
+        if (downloadBgBtn) {
+            downloadBgBtn.addEventListener('click', function() {
+                const bgDiv = document.getElementById('background');
+                if (bgDiv) {
+                    const style = bgDiv.style.backgroundImage;
+                    const match = style.match(/url\(["']?(.*?)["']?\)/);
+                    if (match && match[1]) {
+                        const imgUrl = match[1];
+                        // 直接下载图片
+                        const a = document.createElement('a');
+                        a.href = imgUrl;
+                        a.download = 'wallpaper.jpg';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    } else {
+                        alert('未检测到背景图片');
+                    }
+                }
+            });
+        }
+
+        // 悬浮硬件信息卡片逻辑
+        const tooltip = document.getElementById('hardware-tooltip');
+        // mock数据，首次悬停时拉取API
+        let hardwareInfo = null;
+        let hardwareInfoLoaded = false;
+        async function fetchHardwareInfo() {
+            if (hardwareInfoLoaded) return;
+            try {
+                const res = await fetch('/api/v1/hardware');
+                const data = await res.json();
+                if (data.code === 200 && data.data) {
+                    hardwareInfo = data.data;
+                    hardwareInfoLoaded = true;
+                }
+            } catch (e) { console.warn('硬件信息API获取失败', e); }
+        }
+        function showTooltip(type, event) {
+            // 首次悬停时拉取
+            if (!hardwareInfoLoaded) fetchHardwareInfo().then(()=>showTooltip(type, event));
+            let html = '';
+            if (hardwareInfo && type === 'cpu') {
+                html = `<div class='font-bold mb-1'>CPU 信息</div>
+                    <div>型号：${hardwareInfo.cpu_model}</div>
+                    <div>数量/核心：${hardwareInfo.cpu_cores} / ${hardwareInfo.cpu_threads}</div>
+                    <div>主频：${hardwareInfo.cpu_freq} MHz</div>`;
+            } else if (hardwareInfo && type === 'memory') {
+                html = `<div class='font-bold mb-1'>内存信息</div>
+                    <div>容量：${hardwareInfo.memory_size}</div>
+                    <div>类型：${hardwareInfo.memory_type}</div>
+                    <div>频率：${hardwareInfo.memory_speed}</div>`;
+            } else if (hardwareInfo && type === 'disk') {
+                html = `<div class='font-bold mb-1'>磁盘信息</div>
+                    <div>型号：${hardwareInfo.disk_model}</div>
+                    <div>容量：${hardwareInfo.disk_size}</div>
+                    <div>类型：${hardwareInfo.disk_type}</div>`;
+            } else {
+                // 加载中或失败时
+                html = '<div style="min-width:120px">正在加载...</div>';
+            }
+            tooltip.innerHTML = html;
+            tooltip.style.display = 'block';
+            tooltip.style.opacity = '1';
+            // 定位，避免溢出
+            let x = event.clientX + 16;
+            let y = event.clientY - 10;
+            if (x + 320 > window.innerWidth) x = window.innerWidth - 340;
+            if (y + 120 > window.innerHeight) y = window.innerHeight - 140;
+            tooltip.style.left = x + 'px';
+            tooltip.style.top = y + 'px';
+        }
+        function hideTooltip() {
+            tooltip.style.opacity = '0';
+            setTimeout(()=>{tooltip.style.display='none';}, 200);
+        }
+        // 绑定
+
+        const cpuBar = document.getElementById('cpu-bar');
+        const memoryBar = document.getElementById('memory-bar');
+        const diskBar = document.getElementById('disk-bar');
+        if (cpuBar) {
+            cpuBar.addEventListener('mouseenter', e => showTooltip('cpu', e));
+            cpuBar.addEventListener('mousemove', e => showTooltip('cpu', e));
+            cpuBar.addEventListener('mouseleave', hideTooltip);
+        }
+        if (memoryBar) {
+            memoryBar.addEventListener('mouseenter', e => showTooltip('memory', e));
+            memoryBar.addEventListener('mousemove', e => showTooltip('memory', e));
+            memoryBar.addEventListener('mouseleave', hideTooltip);
+        }
+        if (diskBar) {
+            diskBar.addEventListener('mouseenter', e => showTooltip('disk', e));
+            diskBar.addEventListener('mousemove', e => showTooltip('disk', e));
+            diskBar.addEventListener('mouseleave', hideTooltip);
+        }
+    </script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 类似于IOS解锁后的冲击感过渡动画
+            const cardIds = [
+                'system-status-card',      // 冲击感重
+                'main-chart-card',         // 冲击感重
+                'service-status-card',     // 次重
+                'network-chart-card',      // 次重
+                'disk-chart-card',         // 轻
+                'system-log-card'          // 轻
+            ];
+            const delays = [0, 120, 260, 400, 540, 700]; // ms，前面冲击感重，后面缓入
+            cardIds.forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el) {
+                    setTimeout(() => {
+                        el.classList.add('in');
+                    }, delays[i]);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

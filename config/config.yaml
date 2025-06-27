@@ -1,0 +1,47 @@
+server:
+  port: "8080"
+  host: "0.0.0.0"
+  log_level: "info"
+
+database:
+  driver: "sqlite"
+  database: "monitor.db"
+
+# 监控配置
+monitor:
+  # 监控间隔时间
+  interval: 5
+  # 历史数据保存时间（7天）
+  history_hours: 168
+  # 告警阈值
+  alert_cpu: 80
+  alert_memory: 80
+  # 告警阈值
+  alert_disk: 90
+
+# 服务配置
+services:
+  # 数据库配置
+  database:
+    host: "localhost"
+    port: "3306"
+    username: "root"
+    password: "password"
+    database: "test"
+  # Web服务配置
+  web:
+    url: "localhost"
+    port: "80"
+    protocol: "http"
+  # 邮件服务配置
+  mail:
+    host: "localhost"
+    port: "25"
+    username: "admin"
+    password: "password"
+  # 存储服务配置
+  storage:
+    endpoint: "localhost:9000"
+    access_key: "minioadmin"
+    secret_key: "minioadmin"
+    bucket: "monitor" 
